@@ -1,8 +1,7 @@
-# controller.py
-
 import tkinter as tk
 from model import SIRModel
 from view import SIRView
+
 
 class SIRController:
     def __init__(self, root):
@@ -26,6 +25,7 @@ class SIRController:
 
         except ValueError:
             self.view.display_error("Please enter valid numeric values for all fields.")
+
 
 # Main program
 if __name__ == "__main__":
