@@ -9,7 +9,7 @@ class SIRView:
         self.root = root
         self.root.title("SIR Model with Vaccination")
 
-        # Labels and Entry widgets for parameters
+        # Entry fields for parameters
         tk.Label(root, text="Population (N)").grid(row=0, column=0, padx=10, pady=5, sticky="e")
         self.population_entry = tk.Entry(root)
         self.population_entry.grid(row=0, column=1, padx=10, pady=5)
@@ -35,17 +35,28 @@ class SIRView:
         self.vaccine_efficacy_entry.grid(row=4, column=1, padx=10, pady=5)
         self.vaccine_efficacy_entry.insert(0, "0.8")
 
+        # Checkboxes for options
+        self.optimal_allocation_var = tk.BooleanVar()
+        tk.Checkbutton(root, text="Use Optimal Vaccine Allocation", variable=self.optimal_allocation_var).grid(row=5,
+                                                                                                               columnspan=2,
+                                                                                                               sticky="w")
+
+        self.herd_immunity_var = tk.BooleanVar()
+        tk.Checkbutton(root, text="Display Herd Immunity Threshold", variable=self.herd_immunity_var).grid(row=6,
+                                                                                                           columnspan=2,
+                                                                                                           sticky="w")
+
         # Error label
         self.error_label = tk.Label(root, text="", fg="red")
-        self.error_label.grid(row=5, columnspan=2)
+        self.error_label.grid(row=7, columnspan=2)
 
         # Button to run simulation
         self.run_button = ttk.Button(root, text="Run Simulation")
-        self.run_button.grid(row=6, columnspan=2, pady=10)
+        self.run_button.grid(row=8, columnspan=2, pady=10)
 
         # Frame to hold the plot
         self.plot_frame = tk.Frame(root)
-        self.plot_frame.grid(row=7, column=0, columnspan=2, padx=10, pady=10)
+        self.plot_frame.grid(row=9, column=0, columnspan=2, padx=10, pady=10)
 
     def display_error(self, message):
         self.error_label.config(text=message)
@@ -56,10 +67,11 @@ class SIRView:
             "R0": float(self.R0_entry.get()),
             "gamma": float(self.gamma_entry.get()),
             "vaccine_coverage": float(self.vaccine_coverage_entry.get()),
-            "vaccine_efficacy": float(self.vaccine_efficacy_entry.get())
+            "vaccine_efficacy": float(self.vaccine_efficacy_entry.get()),
+            "optimal_allocation": self.optimal_allocation_var.get()
         }
 
-    def display_results(self, t, S, I, R):
+    def display_results(self, t, S, I, R, herd_immunity=None):
         # Clear previous plot
         for widget in self.plot_frame.winfo_children():
             widget.destroy()
@@ -74,6 +86,11 @@ class SIRView:
         ax.set_title('SIR Model with Vaccination')
         ax.legend()
         ax.grid()
+
+        # Display herd immunity threshold if selected
+        if herd_immunity:
+            ax.axhline(herd_immunity, color='purple', linestyle='--', label='Herd Immunity Threshold')
+            ax.legend()
 
         # Display plot in Tkinter
         canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
