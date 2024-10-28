@@ -78,7 +78,9 @@ class SIRView:
         self.example_dropdown['values'] = ["Custom", "Example 1: High Contact", "Example 2: Age-Based"]
         self.example_dropdown.grid(row=9, column=1, padx=10, pady=5)
         self.example_dropdown.current(0)  # Default to "Custom"
-        self.example_dropdown.bind("<<ComboboxSelected>>", self.set_example)
+
+        # Bind directly to the on_example_select method to avoid conflicts
+        self.example_dropdown.bind("<<ComboboxSelected>>", self.on_example_select)
 
         # Checkbox for Optimal Vaccine Allocation
         self.optimal_allocation_var = tk.BooleanVar()
@@ -105,6 +107,24 @@ class SIRView:
         self.plot_frame_2 = tk.Frame(self.scrollable_frame)
         self.plot_frame_2.pack(side="right", padx=10, pady=10, fill="both", expand=True)
 
+    def on_example_select(self, event):
+        """Handles example selection and sets the example parameters."""
+        example = self.example_var.get()
+        examples = {
+            "Example 1: High Contact": {
+                "population": 1000, "R0": 5.5, "gamma": 0.1,
+                "vaccine_coverage": 0.7, "vaccine_efficacy": 0.9,
+                "group_percentages": [0.3, 0.5, 0.2]
+            },
+            "Example 2: Age-Based": {
+                "population": 1000, "R0": 3.0, "gamma": 0.07,
+                "vaccine_coverage": 0.6, "vaccine_efficacy": 0.85,
+                "group_percentages": [0.25, 0.4, 0.35]
+            }
+        }
+        if example in examples:
+            self.set_example(examples[example])
+
     def get_parameters(self):
         """Retrieve parameters from GUI fields."""
         try:
@@ -126,27 +146,27 @@ class SIRView:
             self.display_error("Please enter valid numeric values for all fields.")
             return None
 
-    def set_example(self, event):
-        """Set predefined example values based on selection."""
-        example = self.example_var.get()
+    def set_example(self, params=None):
+        """Set predefined example values based on selection in dropdown."""
+        if params is None:
+            example = self.example_var.get()
 
-        # Example values (placeholders, modify according to specific examples)
-        examples = {
-            "Example 1: High Contact": {
-                "population": 1000, "R0": 5.5, "gamma": 0.1,
-                "vaccine_coverage": 0.7, "vaccine_efficacy": 0.9,
-                "group_percentages": [0.3, 0.5, 0.2]
-            },
-            "Example 2: Age-Based": {
-                "population": 1000, "R0": 3.0, "gamma": 0.07,
-                "vaccine_coverage": 0.6, "vaccine_efficacy": 0.85,
-                "group_percentages": [0.25, 0.4, 0.35]
+            # Predefined examples if selected via dropdown (can be expanded as needed)
+            examples = {
+                "Example 1: High Contact": {
+                    "population": 1000, "R0": 5.5, "gamma": 0.1,
+                    "vaccine_coverage": 0.7, "vaccine_efficacy": 0.9,
+                    "group_percentages": [0.3, 0.5, 0.2]
+                },
+                "Example 2: Age-Based": {
+                    "population": 1000, "R0": 3.0, "gamma": 0.07,
+                    "vaccine_coverage": 0.6, "vaccine_efficacy": 0.85,
+                    "group_percentages": [0.25, 0.4, 0.35]
+                }
             }
-        }
+            params = examples.get(example)
 
-        # Apply example if one is selected
-        if example in examples:
-            params = examples[example]
+        if params:
             self.population_entry.delete(0, tk.END)
             self.population_entry.insert(0, str(params["population"]))
 

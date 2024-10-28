@@ -8,37 +8,6 @@ class SIRController:
         self.view = SIRView(root)
         self.view.run_button.config(command=self.run_simulation)
 
-        # Bind example selection to apply predefined parameters
-        self.view.example_dropdown.bind("<<ComboboxSelected>>", self.apply_example)
-
-    def apply_example(self, event):
-        """Applies predefined example parameters based on selection."""
-        example_name = self.view.example_var.get()
-
-        # Predefined example values from papers
-        examples = {
-            "Example 1: High Contact (Paper 1)": {
-                "population": 10000,
-                "R0": 5.5,
-                "gamma": 0.1,
-                "vaccine_coverage": 0.7,
-                "vaccine_efficacy": 0.9,
-                "group_percentages": [0.3, 0.5, 0.2]
-            },
-            "Example 2: Age-Based (Paper 2)": {
-                "population": 10000,
-                "R0": 3.0,
-                "gamma": 0.07,
-                "vaccine_coverage": 0.6,
-                "vaccine_efficacy": 0.85,
-                "group_percentages": [0.25, 0.4, 0.35]
-            }
-        }
-
-        # Apply example parameters if one is selected
-        if example_name in examples:
-            self.view.set_example(examples[example_name])
-
     def run_simulation(self):
         try:
             # Get parameters from the view
