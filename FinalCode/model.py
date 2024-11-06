@@ -46,15 +46,15 @@ class SIRModel:
             group["susceptibility"] * np.sum(self.contact_matrix[idx]) for idx, group in enumerate(self.groups)
         ]
 
-        # For high R0, prioritize low exposure index groups
-        if self.R0 > 5:
+        # For R0 > 5.7, prioritize low exposure index groups
+        if self.R0 > 5.7:
             groups_sorted = sorted(range(len(self.groups)), key=lambda i: exposure_indices[i])
             for i in groups_sorted:
                 group_vaccines = total_vaccines * self.groups[i]["fraction"]
                 allocation.append(group_vaccines)
                 total_vaccines -= group_vaccines
         else:
-            # Allocate proportionally for lower R0
+            # For lower R0, allocate proportionally to high exposure
             for group in self.groups:
                 allocation.append(total_vaccines * group["fraction"])
 
@@ -62,9 +62,10 @@ class SIRModel:
 
     def simulate(self, t_max=160):
         # Initial vaccine allocation setup
+        total_vaccines = self.N * self.vaccine_coverage * self.vaccine_efficacy
         allocations = self.optimal_vaccine_allocation() if self.optimal_allocation else [
-                                                                                            self.N * self.vaccine_coverage * self.vaccine_efficacy
-                                                                                        ] * len(self.groups)
+            total_vaccines * group["fraction"] for group in self.groups  # Distribute vaccines based on group size
+        ]
 
         # Initialize results
         results = []
@@ -72,11 +73,14 @@ class SIRModel:
 
         for idx, group in enumerate(self.groups):
             group_size = self.N * group["fraction"]
-            V = allocations[idx] * self.vaccine_efficacy
-            S0 = group_size - V  # Susceptible after accounting for vaccinated
+
+            # Calculate V and ensure it does not exceed group_size
+            V = min(allocations[idx], group_size)  # Cap vaccinated individuals to group size
+
+            S0 = group_size - V  # Susceptible population after vaccination
 
             # Initial small infection seed
-            I0 = group_size * 0.001
+            I0 = 1
             R0 = 0
             y0 = S0, I0, R0, V
 

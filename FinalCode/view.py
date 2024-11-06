@@ -112,12 +112,12 @@ class SIRView:
         example = self.example_var.get()
         examples = {
             "Example 1: High Contact": {
-                "population": 1000, "R0": 5.5, "gamma": 0.1,
+                "population": 10000, "R0": 6.5, "gamma": 0.1,
                 "vaccine_coverage": 0.7, "vaccine_efficacy": 0.9,
                 "group_percentages": [0.3, 0.5, 0.2]
             },
             "Example 2: Age-Based": {
-                "population": 1000, "R0": 3.0, "gamma": 0.07,
+                "population": 10000, "R0": 3.0, "gamma": 0.07,
                 "vaccine_coverage": 0.6, "vaccine_efficacy": 0.85,
                 "group_percentages": [0.25, 0.4, 0.35]
             }
