@@ -1,6 +1,6 @@
 class InteractionGroup:
 
-    def __init__(self, group, baseInteractions = 4):
+    def __init__(self, group, baseInteractions=4):
         self.group = group
 
         if group == 1:
@@ -12,9 +12,10 @@ class InteractionGroup:
         else:
             raise ValueError("Group number can be 1, 2 or 3. Nothing else!")
 
+
 class Person:
 
-    def __init__(self, interactionGroup: InteractionGroup, age: int, isVaccinated = False):
+    def __init__(self, interactionGroup: InteractionGroup, age: int, isVaccinated=False):
         self.interactionGroup = interactionGroup
         self.age = age
         self.isVaccinated = isVaccinated
@@ -22,17 +23,17 @@ class Person:
         self.recovered = False
 
     def getNumberOfInteractions(self):
-        return self.InteractionGroup.interactions
-    
+        return self.interactionGroup.interactions
+
     def returnAge(self):
         return self.age
-    
+
     def setVaccination(self):
         self.isVaccinated = True
 
     def getIsVaccinated(self):
         return self.isVaccinated
-    
+
     def setInfected(self):
         self.isInfected = True
 
