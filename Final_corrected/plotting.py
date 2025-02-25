@@ -4,10 +4,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 days_to_simulate = 150
-output_folder = "graphs"
 output_folder_sirv = "graphs_sirv"
 output_folder_continues = "graphs_continues"
-os.makedirs(output_folder, exist_ok=True)
 os.makedirs(output_folder_sirv, exist_ok=True)
 os.makedirs(output_folder_continues, exist_ok=True)
 
@@ -27,13 +25,7 @@ totalPathOptimalContinues = "optimal_allocation_total.pdf"
 
 
 def plot(type, allocation, S, I, R):
-    if type == "sir" and allocation == "uniform":
-        plot_sir(S, I, R, days_to_simulate, group, os.path.join(output_folder, groupPath))
-        plot_total_sir(S, I, R, days_to_simulate, total, os.path.join(output_folder, totalPath))
-    elif type == "sir" and allocation == "optimal":
-        plot_sir(S, I, R, days_to_simulate, groupOptimal, os.path.join(output_folder, groupPathOptimal))
-        plot_total_sir(S, I, R, days_to_simulate, totalOptimal, os.path.join(output_folder, totalPathOptimal))
-    elif type == "sirv" and allocation == "uniform":
+    if type == "sirv" and allocation == "uniform":
         plot_sir(S, I, R, days_to_simulate, group, os.path.join(output_folder_sirv, groupPath))
         plot_total_sir(S, I, R, days_to_simulate, total, os.path.join(output_folder_sirv, totalPath))
     elif type == "sirv" and allocation == "optimal":
