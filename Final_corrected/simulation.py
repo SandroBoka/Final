@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 from scipy.integrate import odeint
 
@@ -48,6 +46,7 @@ exposure_index = np.array(
 
 total_vaccines = vaccine_coverage_fraction * population
 
+
 # ---------------------------------------- Allocation Functions --------------------------------------------
 
 def uniform_allocation(total_vaccines, group_sizes):
@@ -78,7 +77,6 @@ def optimal_allocation(total_vaccines, group_sizes, exposure_index):
 
 def run_sirv_model(group_sizes, initially_infected, vaccine_allocation, beta,
                    gamma, vaccine_efficacy, contact_matrix, days):
-
     num_groups = len(group_sizes)
     S = np.zeros((days, num_groups))
     V = np.zeros((days, num_groups))
@@ -90,6 +88,9 @@ def run_sirv_model(group_sizes, initially_infected, vaccine_allocation, beta,
     V[0, :] = vaccine_allocation
     I[0, :] = initially_infected
     R[0, :] = 0
+
+    epidemic_end_day = None
+    threshold = 1
 
     # D_jk matrix using absolute group sizes needed here
     D_matrix = np.zeros_like(contact_matrix, dtype=float)
@@ -116,12 +117,23 @@ def run_sirv_model(group_sizes, initially_infected, vaccine_allocation, beta,
             I[t, j] = max(I[t - 1, j] + dI, 0)
             R[t, j] = max(R[t - 1, j] + dR, 0)
 
+            total_infected_today = I[t, :].sum()
+            total_infected_yesterday = I[t - 1, :].sum()
+            delta_infected = abs(total_infected_today - total_infected_yesterday)
+
+            if delta_infected < threshold and epidemic_end_day is None and t > 20:
+                epidemic_end_day = t
+
+    total_infected = int(S[0, :].sum() - S[-1, :].sum())
+
+    print(f"Total number of infected individuals: {total_infected}")
+    print(f"Days until epidemic stopped: {epidemic_end_day}")
+
     return S, I, R
 
 
 def run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocation, beta,
                               gamma, vaccine_efficacy, contact_matrix, t_max):
-
     # Initial conditions
     num_groups = len(group_sizes)
 
@@ -173,6 +185,8 @@ if __name__ == "__main__":
     # Uniform vaccine allocation
     vaccine_allocation_uniform = uniform_allocation(total_vaccines, group_sizes)
 
+    print("------------------------------------------------------------------------------------")
+    print("Uniform:")
     S_uniform_numerical, I_uniform_numerical, R_uniform_numerical = run_sirv_model(
         group_sizes, initially_infected, vaccine_allocation_uniform,
         beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate
@@ -182,16 +196,22 @@ if __name__ == "__main__":
     # Optimal vaccine allocation
     vaccine_allocation_optimal = optimal_allocation(total_vaccines, group_sizes, exposure_index)
 
+    print("------------------------------------------------------------------------------------")
+    print("Optimal:")
     S_optimal_numerical, I_optimal_numerical, R_optimal_numerical = run_sirv_model(
         group_sizes, initially_infected, vaccine_allocation_optimal,
         beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate
     )
     plot("sirv", "optimal", S_optimal_numerical, I_optimal_numerical, R_optimal_numerical)
 
+    print("------------------------------------------------------------------------------------")
+    print("Uniform continues:")
     t, S, I, R = run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocation_uniform,
                                            beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate)
     plot_continues("uniform", S, I, R, t)
 
+    print("------------------------------------------------------------------------------------")
+    print("Optimal continues:")
     t, S, I, R = run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocation_optimal,
                                            beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate)
     plot_continues("optimal", S, I, R, t)
