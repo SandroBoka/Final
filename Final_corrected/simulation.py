@@ -173,6 +173,8 @@ def run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocatio
     result = odeint(sirv_derivatives, np.concatenate([S, V, I, R]), t)
     S, V, I, R = np.split(result, 4, axis=1)
 
+    print(f"Total number of infected individuals: {int(S[0, :].sum() - S[-1, :].sum())}")
+
     return t, S, I, R
 
 
@@ -205,13 +207,13 @@ if __name__ == "__main__":
     plot("sirv", "optimal", S_optimal_numerical, I_optimal_numerical, R_optimal_numerical)
 
     print("------------------------------------------------------------------------------------")
-    print("Uniform continues:")
+    print("Uniform continuous:")
     t, S, I, R = run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocation_uniform,
                                            beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate)
     plot_continues("uniform", S, I, R, t)
 
     print("------------------------------------------------------------------------------------")
-    print("Optimal continues:")
+    print("Optimal continuous:")
     t, S, I, R = run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocation_optimal,
                                            beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate)
     plot_continues("optimal", S, I, R, t)
