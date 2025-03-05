@@ -6,8 +6,12 @@ from matplotlib import pyplot as plt
 days_to_simulate = 150
 output_folder_sirv = "graphs_sirv"
 output_folder_continues = "graphs_continues"
+output_folder_group_specific_uniform = os.path.join(output_folder_sirv, "group_specific_uniform")
+output_folder_group_specific_optimal = os.path.join(output_folder_sirv, "group_specific_optimal")
 os.makedirs(output_folder_sirv, exist_ok=True)
 os.makedirs(output_folder_continues, exist_ok=True)
+os.makedirs(output_folder_group_specific_uniform, exist_ok=True)
+os.makedirs(output_folder_group_specific_optimal, exist_ok=True)
 
 group = "Uniform Vaccine Allocation (Group-Specific)"
 groupPath = "uniform_allocation_group_specific.pdf"
@@ -26,10 +30,10 @@ totalPathOptimalContinues = "optimal_allocation_total.pdf"
 
 def plot(type, allocation, S, I, R):
     if type == "sirv" and allocation == "uniform":
-        plot_sir(S, I, R, days_to_simulate, group, os.path.join(output_folder_sirv, groupPath))
+        plot_sir(S, I, R, days_to_simulate, group, groupPath, "uniform")
         plot_total_sir(S, I, R, days_to_simulate, total, os.path.join(output_folder_sirv, totalPath))
     elif type == "sirv" and allocation == "optimal":
-        plot_sir(S, I, R, days_to_simulate, groupOptimal, os.path.join(output_folder_sirv, groupPathOptimal))
+        plot_sir(S, I, R, days_to_simulate, groupOptimal, groupPathOptimal, "optimal")
         plot_total_sir(S, I, R, days_to_simulate, totalOptimal, os.path.join(output_folder_sirv, totalPathOptimal))
     else:
         print(f"Wrong type passed: {type}, or wrong allocation passed: {allocation}")
@@ -46,33 +50,37 @@ def plot_continues(allocation, S, I, R, t):
         print(f"Wrong allocation passed: {allocation}")
 
 
-def plot_sir(S, I, R, days, title, filename=None):
+def plot_sir(S, I, R, days, title, filename_prefix, allocation_type):
     """
-    Plots the SIR model results for each group and optionally saves the plot as a PDF.
+    Plots the SIR model results for each group separately and saves the plots as PDFs in dedicated folders.
 
     Parameters:
         S, I, R: arrays of susceptible, infected, and recovered counts over time
         days: int, number of days simulated
         title: str, title for the plot
-        filename: str, optional, path to save the plot as a PDF
+        filename_prefix: str, path prefix to save the plots as PDFs
+        allocation_type: str, either 'uniform' or 'optimal' to determine folder structure
     """
     time = np.arange(days)
-    plt.figure(figsize=(20, 12))
+
+    output_folder = output_folder_group_specific_uniform if allocation_type == "uniform" else output_folder_group_specific_optimal
+
     for group in range(S.shape[1]):
-        plt.plot(time, S[:, group], label=f"Susceptible (Group {group + 1})")
-        plt.plot(time, I[:, group], label=f"Infected (Group {group + 1})")
-        plt.plot(time, R[:, group], label=f"Recovered (Group {group + 1})")
+        plt.figure(figsize=(20, 12))
+        plt.plot(time, S[:, group], label=f"Susceptible (Group {group + 1})", color='blue')
+        plt.plot(time, I[:, group], label=f"Infected (Group {group + 1})", color='red')
+        plt.plot(time, R[:, group], label=f"Recovered (Group {group + 1})", color='green')
 
-    plt.xlabel("Days")
-    plt.ylabel("Population")
-    plt.xticks(np.arange(0, days + 1, 5))
-    plt.title(title)
-    plt.legend()
-    plt.grid(True)
+        plt.xlabel("Days")
+        plt.ylabel("Population")
+        plt.xticks(np.arange(0, days + 1, 5))
+        plt.title(f"{title} - Group {group + 1}")
+        plt.legend()
+        plt.grid(True)
 
-    if filename:
+        filename = os.path.join(output_folder, f"{filename_prefix}_group_{group + 1}.pdf")
         plt.savefig(filename, format='pdf', bbox_inches='tight')
-    plt.show()
+        plt.show()
 
 
 def plot_total_sir(S, I, R, days, title, filename=None):
