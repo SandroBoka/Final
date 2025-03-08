@@ -2,6 +2,7 @@ import numpy as np
 from scipy.integrate import odeint
 
 from plotting import plot, plot_continues
+from csv_saver import save_to_csv
 
 # ---------------------------------------- Predefined Parameters ---------------------------------------------
 
@@ -76,7 +77,7 @@ def optimal_allocation(total_vaccines, group_sizes, exposure_index):
 # ------------------------------------------- SIRV Model ----------------------------------------------------
 
 def run_sirv_model(group_sizes, initially_infected, vaccine_allocation, beta,
-                   gamma, vaccine_efficacy, contact_matrix, days):
+                   gamma, vaccine_efficacy, contact_matrix, days, allocation_type):
     num_groups = len(group_sizes)
     S = np.zeros((days, num_groups))
     V = np.zeros((days, num_groups))
@@ -126,6 +127,11 @@ def run_sirv_model(group_sizes, initially_infected, vaccine_allocation, beta,
 
     total_infected = int(S[0, :].sum() - S[-1, :].sum())
 
+    save_to_csv(f"sirv_{allocation_type}.csv", np.hstack([S, I, R]),
+                [f"S_{i}" for i in range(num_groups)] +
+                [f"I_{i}" for i in range(num_groups)] +
+                [f"R_{i}" for i in range(num_groups)])
+
     print(f"Total number of infected individuals: {total_infected}")
     print(f"Days until epidemic stopped: {epidemic_end_day}")
 
@@ -133,7 +139,7 @@ def run_sirv_model(group_sizes, initially_infected, vaccine_allocation, beta,
 
 
 def run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocation, beta,
-                              gamma, vaccine_efficacy, contact_matrix, t_max):
+                              gamma, vaccine_efficacy, contact_matrix, t_max, allocation_type):
     # Initial conditions
     num_groups = len(group_sizes)
 
@@ -173,6 +179,11 @@ def run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocatio
     result = odeint(sirv_derivatives, np.concatenate([S, V, I, R]), t)
     S, V, I, R = np.split(result, 4, axis=1)
 
+    save_to_csv(f"sirv_continuous_{allocation_type}.csv", np.hstack([t[:, None], S, I, R]),
+                ["time"] + [f"S_{i}" for i in range(num_groups)] +
+                [f"I_{i}" for i in range(num_groups)] +
+                [f"R_{i}" for i in range(num_groups)])
+
     print(f"Total number of infected individuals: {int(S[0, :].sum() - S[-1, :].sum())}")
 
     return t, S, I, R
@@ -191,7 +202,7 @@ if __name__ == "__main__":
     print("Uniform:")
     S_uniform_numerical, I_uniform_numerical, R_uniform_numerical = run_sirv_model(
         group_sizes, initially_infected, vaccine_allocation_uniform,
-        beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate
+        beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate, "uniform"
     )
     plot("sirv", "uniform", S_uniform_numerical, I_uniform_numerical, R_uniform_numerical)
 
@@ -202,18 +213,19 @@ if __name__ == "__main__":
     print("Optimal:")
     S_optimal_numerical, I_optimal_numerical, R_optimal_numerical = run_sirv_model(
         group_sizes, initially_infected, vaccine_allocation_optimal,
-        beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate
+        beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate, "optimal"
     )
     plot("sirv", "optimal", S_optimal_numerical, I_optimal_numerical, R_optimal_numerical)
 
     print("------------------------------------------------------------------------------------")
     print("Uniform continuous:")
     t, S, I, R = run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocation_uniform,
-                                           beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate)
+                                           beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate, "uniform")
     plot_continues("uniform", S, I, R, t)
 
     print("------------------------------------------------------------------------------------")
     print("Optimal continuous:")
     t, S, I, R = run_sirv_model_continuous(group_sizes, initially_infected, vaccine_allocation_optimal,
-                                           beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate)
+                                           beta, gamma, vaccine_efficacy, contact_matrix, days_to_simulate,
+                                           "continuous")
     plot_continues("optimal", S, I, R, t)
