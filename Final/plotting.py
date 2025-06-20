@@ -100,12 +100,12 @@ def plot_total_sir(S, I, R, days, title, filename=None):
     total_R = np.sum(R, axis=1)
 
     plt.figure(figsize=(20, 12))
-    plt.plot(time, total_S, label="Total Susceptible", color='blue')
-    plt.plot(time, total_I, label="Total Infected", color='red')
-    plt.plot(time, total_R, label="Total Recovered", color='green')
+    plt.plot(time, total_S, label="Susceptible", color='blue')
+    plt.plot(time, total_I, label="Infected", color='red')
+    plt.plot(time, total_R, label="Recovered", color='green')
 
     plt.xlabel("Days")
-    plt.ylabel("Total Population")
+    plt.ylabel("Population")
     plt.xticks(np.arange(0, days + 1, 5))
     plt.title(title)
     plt.legend()
@@ -115,15 +115,14 @@ def plot_total_sir(S, I, R, days, title, filename=None):
         plt.savefig(filename, format='pdf', bbox_inches='tight')
     plt.show()
 
-
 def plot_sir_continues(S, I, R, t, title, filename):
     plt.figure(figsize=(20, 12))
-    plt.plot(t, I.sum(axis=1), label="Infected")
-    plt.plot(t, S.sum(axis=1), label="Susceptible")
-    plt.plot(t, R.sum(axis=1), label="Recovered")
+    plt.plot(t, S.sum(axis=1), label="Susceptible", color='blue')
+    plt.plot(t, I.sum(axis=1), label="Infected", color='red')
+    plt.plot(t, R.sum(axis=1), label="Recovered", color='green')
     plt.xlabel("Days")
-    plt.xticks(np.arange(0, days_to_simulate + 1, 5))
     plt.ylabel("Population")
+    plt.xticks(np.arange(0, days_to_simulate + 1, 5))
     plt.title(title)
     plt.grid(True)
     plt.legend()
